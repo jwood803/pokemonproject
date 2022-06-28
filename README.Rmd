@@ -1,0 +1,37 @@
+---
+title: "Vignette"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE, eval=TRUE}
+get_pokemon_characters <- function(character_name) {
+  library(httr)
+  library(jsonlite)
+
+  resp <- GET(paste0("https://pokeapi.co/api/v2/pokemon/", character_name))
+  
+  return(fromJSON(rawToChar(resp$content)))
+}
+```
+
+# Pokemon API
+
+This vignette will show how to contact the Pokemon API () and how to use the functions provided.
+
+## Required packages
+
+The following are the packages required to use the Pokemon API functions.
+
+```{r, eval=FALSE}
+install.packages(c("httr", "jsonlite"))
+```
+
+- "httr" is used to help make the HTTP calls for the API
+- "jsonlite" is used to help parse the JSON data into an R list
+
+## Getting Pokemon Character Information
+
+The first method will be getting Pokemon character information. This 
