@@ -1,32 +1,46 @@
 ---
-title: "Vignette"
+title: "Pokemon API Vignette"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, include=FALSE, eval=TRUE}
-get_pokemon_characters <- function(character_name) {
-  library(httr)
-  library(jsonlite)
+```{r}
+# Load packages
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(gridExtra)
+library(ggplot2)
+```
 
+
+```{r, include=FALSE, eval=TRUE}
+get_pokemon_character <- function(character_name) {
   resp <- GET(paste0("https://pokeapi.co/api/v2/pokemon/", character_name))
   
-  return(fromJSON(rawToChar(resp$content)))
+  data <- fromJSON(rawToChar(resp$content))
+    
+  return_list <- list()
+  
+  return_list$name <- data$name
+  return_list$stats <- data$stats %>% unnest
+  
+  return(return_list)
 }
 ```
 
 # Pokemon API
 
-This vignette will show how to contact the Pokemon API () and how to use the functions provided.
+This vignette will show how to contact the Pokemon API (https://pokeapi.co/docs/v2) and how to use the functions provided.
 
 ## Required packages
 
 The following are the packages required to use the Pokemon API functions.
 
 ```{r, eval=FALSE}
-install.packages(c("httr", "jsonlite"))
+install.packages(c("httr", "jsonlite", "tidyverse", "gridExtra"))
 ```
 
 - "httr" is used to help make the HTTP calls for the API
@@ -34,4 +48,40 @@ install.packages(c("httr", "jsonlite"))
 
 ## Getting Pokemon Character Information
 
-The first method will be getting Pokemon character information. This 
+The first method will be getting Pokemon character information. This will give main attributes and stats on any Pokemon character. For example, if we want stats from Pikachu we can call the following code:
+
+```{r}
+ret <- get_pokemon_character("pikachu")
+```
+
+And can get information from the character from the return object, such as the character's stats.
+
+```{r}
+ret$stats
+```
+### Exploratory Data Analysis
+
+We can explore the data further by doing some analysis on it. For instance, we may want to see a box plot of the base stat.
+
+```{r}
+pikachu_stats <- ggplot(ret$stats, aes(x=base_stat)) +
+  geom_boxplot()
+
+pikachu_stats
+```
+
+And we can do this with multiple characters. Let's also get the character stats from Bulbasaur and compare his stats with Pikachu's.
+
+```{r}
+bulbasaur <- get_pokemon_character("bulbasaur")
+
+bulbasaur
+```
+
+```{r}
+bulbasaur_stats <- ggplot(bulbasaur$stats, aes(x=base_stat)) +
+  geom_boxplot()
+
+grid.arrange(pikachu_stats, bulbasaur_stats)
+```
+
