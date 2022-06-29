@@ -3,7 +3,7 @@ title: "Pokemon API Vignette"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.path="./")
 ```
 
 ```{r}
@@ -50,7 +50,7 @@ install.packages(c("httr", "jsonlite", "tidyverse", "gridExtra"))
 
 The first method will be getting Pokemon character information. This will give main attributes and stats on any Pokemon character. For example, if we want stats from Pikachu we can call the following code:
 
-```{r}
+```{r, warning=FALSE}
 ret <- get_pokemon_character("pikachu")
 ```
 

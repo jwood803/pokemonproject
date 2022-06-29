@@ -37,9 +37,6 @@ example, if we want stats from Pikachu we can call the following code:
 ret <- get_pokemon_character("pikachu")
 ```
 
-    ## Warning: `cols` is now required when using unnest().
-    ## Please use `cols = c(stat)`
-
 And can get information from the character from the return object, such
 as the character’s stats.
 
@@ -69,7 +66,7 @@ pikachu_stats <- ggplot(ret$stats, aes(x=base_stat)) +
 pikachu_stats
 ```
 
-![](/Users/jonathanwood/Documents/pokemonproject/README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](./unnamed-chunk-6-1.png)<!-- -->
 
 And we can do this with multiple characters. Let’s also get the
 character stats from Bulbasaur and compare his stats with Pikachu’s.
@@ -106,4 +103,4 @@ bulbasaur_stats <- ggplot(bulbasaur$stats, aes(x=base_stat)) +
 grid.arrange(pikachu_stats, bulbasaur_stats)
 ```
 
-![](/Users/jonathanwood/Documents/pokemonproject/README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](./unnamed-chunk-8-1.png)<!-- -->
