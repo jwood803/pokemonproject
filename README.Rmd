@@ -6,16 +6,6 @@ title: "Pokemon API Vignette"
 knitr::opts_chunk$set(echo = TRUE, fig.path="./")
 ```
 
-```{r}
-# Load packages
-library(httr)
-library(jsonlite)
-library(tidyverse)
-library(gridExtra)
-library(ggplot2)
-```
-
-
 ```{r, include=FALSE, eval=TRUE}
 base_url <- "https://pokeapi.co/api/v2/"
 
@@ -28,6 +18,7 @@ get_pokemon_character <- function(character_name) {
   
   return_list$name <- data$name
   return_list$stats <- data$stats %>% unnest
+  return_list$gameIndex <- data$game_indices$game_index
   
   return(return_list)
 }
@@ -58,8 +49,19 @@ get_abilities <- function(count = 10) {
   return(return_list)
 }
 
-# get pokeman and can do a bar plot on the game index for each
+get_pokemon <- function(count = 10) {
+  resp <- GET(paste0(base_url, "pokemon/"), query=list(limit=count))
+  
+  data <- fromJSON(rawToChar(resp$content))
+  
+  return_list <- list()
+  
+  return_list <- data$results
+  
+  return(return_list)
+}
 ```
+
 
 # Pokemon API
 
@@ -75,6 +77,20 @@ install.packages(c("httr", "jsonlite", "tidyverse", "gridExtra"))
 
 - "httr" is used to help make the HTTP calls for the API
 - "jsonlite" is used to help parse the JSON data into an R list
+- "tidyverse" is used to help mutate data, specifically for unnesting collections to make them into a flat data frame
+- "gridExtra" is used to allow multiple grids in the same output
+- "ggplot2" is used to make all of the plots
+
+Then use the below code to load in the packages in to the R session.
+
+```{r}
+# Load packages
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(gridExtra)
+library(ggplot2)
+```
 
 ## Getting Pokemon Character Information
 
@@ -119,3 +135,89 @@ grid.arrange(pikachu_stats, bulbasaur_stats)
 
 When comparing the two box plots we can see that the base stats of Bulbasaur is much wider than the base stats of Pikachu. We can also see that Pikachu has a stat that is an outlier from the other stats.
 
+## Get Pokemon Items
+
+The next method will return information on a specific Pokemon item. This method can take in either the item name or th e numerical ID of the item in the database.
+
+For instance if we want the first item, we can call the method with the ID of 1.
+
+```{r}
+item <- get_item(1)
+
+item
+```
+
+This returns the item of "master-ball" and we can use this in the same method to get the data.
+
+```{r}
+master_ball <- get_item("master-ball")
+
+master_ball
+```
+
+
+## Get Abilities List
+
+We can get all abilities, as well, using the `get_abilities` function. This takes in an optional integer value for the count. By default, the count is 10.
+
+```{r}
+ret <- get_abilities()
+
+ret
+```
+If we wanted to get 20 items return, we can specify that.
+
+```{r}
+ret <- get_abilities(20)
+
+ret
+```
+
+## Get Pokemon Character List
+
+The first function returned information from a single Pokemon character, but what if we wanted a list of all characters? The `get_pokemon` method can give us the list.
+
+Similar to the abilities function, the `get_pokemon` function takes in an integer parameter to tell how many results to return. By default, it also returns 10 items.
+
+```{r}
+ret <- get_pokemon()
+
+ret
+```
+And if we wanted 15 results, we can pass that in.
+
+```{r}
+ret <- get_pokemon(15)
+
+ret
+```
+
+## Using Multiple Functions
+
+With the methods we currently have we can combine them to get even more data. For instance, if we wanted to get all of the game indexes for the top 10 Pokemon characters from the API, we can do that.
+
+```{r, warning=FALSE}
+p <- get_pokemon()
+results <- data.frame()
+
+for (item in p$name) {
+  p_char <- get_pokemon_character(item)
+  
+  for (index in p_char$gameIndex) {
+    row <- c(item, index)
+    results <- rbind(results, row)
+  }
+}
+
+colnames(results) <- c("Name", "GameIndex")
+
+results
+```
+
+With this new data, we can do even more data analysis, such as creating a contingency table.
+
+```{r}
+table(results)
+```
+
+From here we can see that each character appears 17 times in a specific game index.
