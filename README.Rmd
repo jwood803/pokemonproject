@@ -17,8 +17,10 @@ library(ggplot2)
 
 
 ```{r, include=FALSE, eval=TRUE}
+base_url <- "https://pokeapi.co/api/v2/"
+
 get_pokemon_character <- function(character_name) {
-  resp <- GET(paste0("https://pokeapi.co/api/v2/pokemon/", character_name))
+  resp <- GET(paste0(base_url, "pokemon/", character_name))
   
   data <- fromJSON(rawToChar(resp$content))
     
@@ -29,6 +31,34 @@ get_pokemon_character <- function(character_name) {
   
   return(return_list)
 }
+
+get_item <- function(itemIdOrName) {
+  resp <- GET(paste0(base_url, "item/", itemIdOrName))
+  
+  data <- fromJSON(rawToChar(resp$content))
+  
+  return_list <- list()
+  
+  return_list$name <- data$name
+  return_list$categoryName <- data$category$name
+  return_list$short_desc <- data$effect_entries$short_effect
+  
+  return(return_list)
+}
+
+get_abilities <- function(count = 10) {
+  resp <- GET(paste0(base_url, "ability/"), query=list(limit=count))
+  
+  data <- fromJSON(rawToChar(resp$content))
+  
+  return_list <- list()
+  
+  return_list <- data$results
+  
+  return(return_list)
+}
+
+# get pokeman and can do a bar plot on the game index for each
 ```
 
 # Pokemon API
@@ -65,6 +95,7 @@ We can explore the data further by doing some analysis on it. For instance, we m
 
 ```{r}
 pikachu_stats <- ggplot(ret$stats, aes(x=base_stat)) +
+  ggtitle("Pikachu Stats") +
   geom_boxplot()
 
 pikachu_stats
@@ -80,8 +111,11 @@ bulbasaur
 
 ```{r}
 bulbasaur_stats <- ggplot(bulbasaur$stats, aes(x=base_stat)) +
+  ggtitle("Bulbasaur Stats") +
   geom_boxplot()
 
 grid.arrange(pikachu_stats, bulbasaur_stats)
 ```
+
+When comparing the two box plots we can see that the base stats of Bulbasaur is much wider than the base stats of Pikachu. We can also see that Pikachu has a stat that is an outlier from the other stats.
 
